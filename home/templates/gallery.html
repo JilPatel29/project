@@ -72,7 +72,7 @@
 
         .gallery-item {
             width: 300px;
-            height: 200px;  /* Fixed height as per your original code */
+            height:  300px;
             background-color: #fff;
             border-radius: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -88,8 +88,8 @@
         .gallery-item img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures the image maintains aspect ratio */
-            object-position: center; /* Ensures the most important part of the image is visible */
+            object-fit: cover;
+            object-position: center;
             transition: transform 0.5s ease-out;
         }
 
@@ -109,7 +109,7 @@
             right: 10px;
             padding: 10px;
             border-radius: 10px;
-            opacity: 0; /* Initially hidden */
+            opacity: 0;
             transition: opacity 0.3s ease;
         }
 
@@ -121,7 +121,7 @@
         }
 
         .gallery-item:hover .gallery-info {
-            opacity: 1; /* Shows info on hover */
+            opacity: 1;
         }
 
         .gallery-info h3 {
@@ -151,11 +151,11 @@
 </head>
 <body>
     <div class="gallery-buttons">
-        <button onclick="showCategory('all')" class="active">All</button>
-        <button onclick="showCategory('wedding')">Wedding</button>
-        <button onclick="showCategory('prewedding')">Pre-Wedding</button>
-        <button onclick="showCategory('birthday')">Birthday</button>
-        <button onclick="showCategory('maternity')">Maternity</button>
+        <button onclick="showCategory('all', this)" class="active">All</button>
+        <button onclick="showCategory('wedding', this)">Wedding</button>
+        <button onclick="showCategory('prewedding', this)">Pre-Wedding</button>
+        <button onclick="showCategory('birthday', this)">Birthday</button>
+        <button onclick="showCategory('maternity', this)">Maternity</button>
     </div>
 
     <div class="gallery-container">
@@ -177,21 +177,19 @@
     </div>
 
     <script>
-        // Show all images by default when page loads
         window.onload = function() {
-            showCategory('all');
+            showCategory('all', document.querySelector('.gallery-buttons button'));
         };
 
-        function showCategory(category) {
+        function showCategory(category, button) {
             const sections = document.querySelectorAll('.category-section');
             const buttons = document.querySelectorAll('.gallery-buttons button');
             
-            buttons.forEach(button => button.classList.remove('active'));
-            event.target.classList.add('active');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
 
-            // Show or hide sections based on the selected category
             sections.forEach(section => {
-                if (category === 'all' || section.id === $`{category}-section`) {
+                if (category === 'all' || section.id === `${category}-section`) {
                     section.classList.remove('hidden');
                 } else {
                     section.classList.add('hidden');
