@@ -25,7 +25,6 @@
         .profile-pic-container {
             text-align: center;
             margin-bottom: 20px;
-            position: relative;
         }
 
         .profile-pic {
@@ -35,23 +34,6 @@
             object-fit: cover;
             margin-bottom: 15px;
             border: 3px solid #ff6f91;
-        }
-
-        .remove-pic {
-            position: absolute;
-            top: 0;
-            right: 50%;
-            transform: translateX(75px);
-            background: #ff6f91;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .form-group {
@@ -158,13 +140,13 @@
             <div class="profile-pic-container">
                 {% if user.profile_pic %}
                     <img src="{{ user.profile_pic.url }}" alt="Profile Picture" class="profile-pic">
-                    <button type="submit" name="remove_profile_pic" class="remove-pic" title="Remove profile picture">×</button>
                 {% else %}
                     <img src="/static/images/default-profile.png" alt="Default Profile" class="profile-pic">
                 {% endif %}
 
                 <div class="form-group">
-                   
+                    <label for="profile_pic">Change Profile Picture</label>
+                    <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
                 </div>
             </div>
 
@@ -180,7 +162,7 @@
 
             <div class="form-group">
                 <label for="phone_number">Phone Number</label>
-                <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number }}" pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" required>
+                <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number}}" pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" required>
             </div>
 
             <button type="submit" class="save-button">Save Changes</button>

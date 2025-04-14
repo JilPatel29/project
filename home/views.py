@@ -43,42 +43,6 @@ razorpay_client = razorpay.Client(
 )
 
 @login_required
-def edit_profile(request):
-    if request.method == 'POST':
-        try:
-            if 'remove_profile_pic' in request.POST:
-                if request.user.profile_pic:
-                    request.user.profile_pic.delete()
-                    request.user.profile_pic = None
-                    request.user.save()
-                messages.success(request, 'Profile picture removed successfully!')
-                return redirect('edit_profile')
-
-            # Get form data
-            username = request.POST.get('username')
-            phone_number = request.POST.get('phone_number')
-            
-            # Update user fields
-            request.user.username = username
-            request.user.phone_number = phone_number
-            
-            # Handle profile picture
-            if 'profile_pic' in request.FILES:
-                if request.user.profile_pic:
-                    request.user.profile_pic.delete()
-                request.user.profile_pic = request.FILES['profile_pic']
-            
-            request.user.save()
-            
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('edit_profile')
-            
-        except Exception as e:
-            messages.error(request, f'Error updating profile: {str(e)}')
-            
-    return render(request, 'edit_profile.html')
-
-@login_required
 def process_booking(request):
     if request.method == "POST":
         try:
@@ -91,14 +55,8 @@ def process_booking(request):
             # Get the package
             package = Package.objects.get(id=package_id)
             
-            # Get CustomUser instance
-            try:
-                custom_user = CustomUser.objects.get(id=request.user.id)
-            except CustomUser.DoesNotExist:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'User not found'
-                })
+            # Get or create CustomUser instance
+            custom_user = CustomUser.objects.get(email=request.user.email)   
             
             # Create booking
             booking = Booking.objects.create(
@@ -159,16 +117,6 @@ def process_booking(request):
         'status': 'error',
         'message': 'Invalid request method'
     })
-
-def booking(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    packages = Package.objects.all()
-    context = {
-        'packages': packages
-    }
-    return render(request, 'booking.html', context)
-
 
 @csrf_exempt
 def payment_callback(request):
@@ -443,7 +391,31 @@ def reset_password(request, email):
 
     return render(request, 'reset_password.html')
 
-
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        try:
+            # Get form data
+            username = request.POST.get('username')
+            phone_number = request.POST.get('phone_number')
+            
+            # Update user fields
+            request.user.username = username
+            request.user.phone_number = phone_number
+            
+            # Handle profile picture
+            if 'profile_pic' in request.FILES:
+                request.user.profile_pic = request.FILES['profile_pic']
+            
+            request.user.save()
+            
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('edit_profile')
+            
+        except Exception as e:
+            messages.error(request, f'Error updating profile: {str(e)}')
+            
+    return render(request, 'edit_profile.html')
 
 @login_required
 def add_testimonial(request, booking_id):
@@ -538,3 +510,11 @@ def blog_detail(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
     return render(request, "blog_detail.html", {'blog': blog})
 
+
+# @login_required
+def booking(request):
+    packages = Package.objects.all()
+    context = {
+        'packages': packages
+    }
+    return render(request, 'booking.html', context)

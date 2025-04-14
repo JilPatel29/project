@@ -1,17 +1,16 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import Service, Gallery, Booking, Package, Payment, CustomUser
+from .models import Service, Gallery, Booking, Package, Payment
 import json
 
 class StudioTestCases(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = CustomUser.objects.create_user(
+        self.user = get_user_model().objects.create_user(
             username='testuser',
             email='test@example.com',
-            password='testpass123',
-            phone_number='1234567890'
+            password='testpass123'
         )
         self.package = Package.objects.create(
             name='Test Package',
