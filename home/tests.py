@@ -1,3 +1,5 @@
+# home/tests.py
+
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -60,21 +62,27 @@ class StudioTestCases(TestCase):
     def test_booking_requires_login(self):
         """TC008: Verify booking requires login"""
         response = self.client.get(reverse('booking'))
-        self.assertEqual(response.status_code, 302)  # Redirects to login
+        login_url = reverse('login')
+        self.assertRedirects(response, f'{login_url}?next={reverse("booking")}')
 
     def test_booking_with_login(self):
         """TC009: Verify booking with valid details"""
         self.client.login(username='test@example.com', password='testpass123')
-        response = self.client.post(reverse('process_booking'), {
+        
+        booking_data = {
             'package': self.package.id,
             'booking_date': '2025-05-01',
             'booking_time': '10:00',
             'payment_method': 'cash',
             'phone': '1234567890'
-        })
+        }
+        
+        response = self.client.post(reverse('process_booking'), booking_data)
         self.assertEqual(response.status_code, 200)
+        
         data = json.loads(response.content)
         self.assertEqual(data['status'], 'success')
+        self.assertTrue(Booking.objects.filter(customer=self.user).exists())
 
     def test_unauthorized_admin_access(self):
         """TC015: Verify unauthorized admin access is blocked"""

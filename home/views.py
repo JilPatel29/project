@@ -56,7 +56,14 @@ def process_booking(request):
             package = Package.objects.get(id=package_id)
             
             # Get or create CustomUser instance
-            custom_user = CustomUser.objects.get(email=request.user.email)   
+            try:
+                custom_user = CustomUser.objects.get(id=request.user.id)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'User not found'
+                })
+
             
             # Create booking
             booking = Booking.objects.create(
@@ -394,28 +401,19 @@ def reset_password(request, email):
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        try:
-            # Get form data
-            username = request.POST.get('username')
-            phone_number = request.POST.get('phone_number')
-            
-            # Update user fields
-            request.user.username = username
-            request.user.phone_number = phone_number
-            
-            # Handle profile picture
-            if 'profile_pic' in request.FILES:
-                request.user.profile_pic = request.FILES['profile_pic']
-            
-            request.user.save()
-            
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('edit_profile')
-            
-        except Exception as e:
-            messages.error(request, f'Error updating profile: {str(e)}')
-            
+        user = request.user
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.phone_number = request.POST.get('phone_number')
+        
+        if 'profile_pic' in request.FILES:
+            user.profile_pic = request.FILES['profile_pic']
+        
+        user.save()
+        return redirect('home')
+        
     return render(request, 'edit_profile.html')
+
 
 @login_required
 def add_testimonial(request, booking_id):
