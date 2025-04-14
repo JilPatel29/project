@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div style="background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h2 style="color: #ff6f91; margin-bottom: 20px; text-align: center;">Share Your Experience</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: #ffe6e6; color: #cc0000;">
+                {% else %}
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: #e6ffe6; color: #006600;">
+                {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" style="margin-top: 20px;">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 20px;">
+                <label for="rating" style="display: block; margin-bottom: 8px; font-weight: bold;">Rating:</label>
+                <select name="rating" id="rating" required 
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">Select a rating</option>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="3">3 - Good</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="1">1 - Poor</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="message" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                    Your Message:
+                </label>
+                <textarea name="message" id="message" required
+                          style="width: 100%; padding: 8px; border: 1px solid #ddd; 
+                                 border-radius: 4px; min-height: 150px;"></textarea>
+            </div>
+
+            <div style="text-align: center;">
+                <button type="submit" 
+                        style="background-color: #ff6f91; color: white; padding: 10px 20px;
+                               border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    Submit Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

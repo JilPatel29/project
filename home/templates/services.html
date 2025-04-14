@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    {% if not include %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - Love Modelling Studio</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #d8b789;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background: #ff6f91;
+            color: #fff;
+        }
+        .logo {
+            font-size: 36px;
+            font-family: 'Cursive', sans-serif;
+        }
+
+        nav {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .services-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .service {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            width: 300px;
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .service img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .service h3 {
+            color: #333;
+            padding: 15px;
+            margin: 0;
+        }
+
+        .service p {
+            padding: 0 15px 15px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .service:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #000000;
+            margin-top: 30px;
+        }
+
+        footer a {
+            margin: 0 10px;
+            color: #ff6f91;
+            text-decoration: none;
+        }
+
+        .no-services {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<section class="services-container">
+    {% if services %}
+        {% for service in services %}
+            {% if service.is_active %}
+                <div class="service">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/300x200" alt="{{ service.name }}">
+                    {% endif %}
+                    <h3>{{ service.name }}</h3>
+                    <p>{{ service.description|linebreaks }}</p>
+
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="no-services">
+            <p>No services available at the moment. Please check back later.</p>
+        </div>
+    {% endif %}
+</section>
+
+</body>
+</html>
+{% endblock %}
+{% block footer %}
+    {% if not include %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

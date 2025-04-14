@@ -1,0 +1,11 @@
+<!-- blog_list.html -->
+<h1>Our Latest Blog Posts</h1>
+
+{% for blog in blogs %}
+    <div class="blog-post">
+        <h2>{{ blog.title }}</h2>
+        <p>{{ blog.short_description|truncatewords:30 }}</p> 
+        <p>{{blog.content}}</p> <!-- Truncate for preview -->
+        <a href="{% url 'blog_detail' blog.id %}">Read More</a>  <!-- Link to full content -->
+    </div>
+{% endfor %}

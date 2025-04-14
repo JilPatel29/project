@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Modelling Studio</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom right, #d8b789, #d8b789);
+            color: #000000;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: #ff6f91;
+            color: #fff;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 36px;
+            color: #181717;
+            font-family: 'Cursive', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-button {
+            padding: 8px 16px;
+            background: linear-gradient(to right, #ff6f91, #f8c6dc);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .auth-button:hover {
+            background: linear-gradient(to right, #dd689a, #de607d);
+        }
+
+        .profile-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .username {
+            color: white;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        nav {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #0d0d0d;
+            font-size: 18px;
+        }
+
+        footer {
+            background-color: #000000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #000000;
+            color: white;
+            text-align: left;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            flex: 1;
+            padding: 15px;
+        }
+
+        .footer-section h4 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .footer-section a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #181717;
+            text-decoration: underline;
+        }
+
+        footer p,
+        footer a {
+            margin: 5px 0;
+        }
+
+        @media screen and (max-width: 770px) {
+            .footer-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-section {
+                text-align: center;
+                padding: 10px 0;
+            }
+
+            .auth-buttons {
+                position: relative;
+                top: 0;
+                right: 0;
+                justify-content: center;
+                margin-top: 10px;
+            }
+
+            .profile-section {
+                position: relative;
+                top: 0;
+                right: 0;
+                justify-content: center;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-heart"></i><u><b>CAPTURE LOVE: LOVE MODELLING STUDIO</b></u>
+        </div>
+        <div class="auth-section">
+            {% if user.is_authenticated %}
+            <!-- Update the profile section in base.html -->
+            <div class="profile-section" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                {% if user.is_authenticated %}
+                <a href="{% url 'edit_profile' %}" class="profile-link"
+                    style="display: flex; align-items: center; text-decoration: none;">
+                    {% if user.profile.profile_pic %}
+                    <img src="{{ user.profile.profile_pic.url }}" alt="Profile" class="profile-pic">
+                    {% else %}
+                    <img src="/static/images/default-profile.png" alt="Profile" class="profile-pic">
+                    {% endif %}
+                    <span class="username">{{ user.username }}</span>
+                </a>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}" class="auth-button">Login</a>
+                <a href="{% url 'signup' %}" class="auth-button">Sign Up</a>
+            </div>
+            {% endif %}
+        </div>
+
+
+        <nav>
+            <a href="{% url 'home' %}"><b>Home</b></a>
+            <a href="{% url 'gallery' %}"><b>Gallery</b></a>
+            <a href="{% url 'services' %}"><b>Services</b></a>
+            <a href="{% url 'contact' %}"><b>Contact Us</b></a>
+            <a href="{% url 'booking' %}"><b>Booking</b></a>
+            <a href="{% url 'blog' %}"><b>Blog</b></a>
+        </nav>
+    </header>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>Email: <a href="mailto:info@lovestudio87.com"> lovestudio87@gmail.com</a></p>
+                <p>Phone: <a href="tel: 9998456649"> 9998456649</a></p>
+                <p>Address: 11,Tirupati Complex, Sardar Chowk,Ahmedabad,382450</p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Social Media</h4>
+                <a href="https://wa.me/yourwhatsappnumber" target="_blank">WhatsApp</a><br>
+                <a href="https://www.facebook.com/yourpage" target="_blank">Facebook</a><br>
+                <a href="https://www.instagram.com/yourprofile" target="_blank">Instagram</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="{% url 'gallery' %}">Gallery</a><br>
+                <a href="{% url 'services' %}">Services</a><br>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px 20px; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h1 style="color: #ff6f91; margin-bottom: 20px;">Booking Confirmed!</h1>
+        
+        <div style="margin: 20px 0;">
+            <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Success" style="width: 80px; height: 80px;">
+        </div>
+
+        <p style="font-size: 18px; color: #333; margin-bottom: 20px;">
+            Thank you for booking with Love Modelling Studio. Your booking has been confirmed.
+        </p>
+
+        <p style="color: #666; margin-bottom: 15px;">
+            You will receive a confirmation email shortly with all the details.
+        </p>
+
+        {% if booking and not has_testimonial %}
+        <div style="margin-top: 30px;">
+            <a href="{% url 'add_testimonial' booking.id %}" style="background-color: #ff6f91; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin-bottom: 15px;">
+                Share Your Experience
+            </a>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 15px;">
+            <a href="{% url 'home' %}" style="background-color: #ff6f91; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                Return to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

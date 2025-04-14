@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Modelling Studio</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom right, #dd97b5, #e793cf);
+            color: #333;
+            animation: fadeInBody 1.5s ease-out;
+        }
+
+        /* Fade In for Body */
+        @keyframes fadeInBody {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .main {
+            text-align: center;
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeInMain 1.5s ease-out forwards 0.5s; /* Fade In Main Section */
+        }
+
+        /* Fade In for Main Section */
+        @keyframes fadeInMain {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .main img {
+            width: 45%;
+            max-width: 700px;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s ease;
+        }
+
+        .main img:hover {
+            transform: scale(1.05); /* Zoom Effect on Hover */
+        }
+
+        .about-us {
+            width: 45%;
+            padding: 20px;
+            color: #fff;
+            background-color: rgba(237, 115, 144, 0.8);
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeInAboutUs 1.5s ease-out forwards 1s; /* Fade In About Us Section */
+        }
+
+        /* Fade In for About Us Section */
+        @keyframes fadeInAboutUs {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            opacity: 0;
+            animation: fadeInBanner 1.5s ease-out forwards 1.5s; /* Fade In Welcome Banner */
+        }
+
+        /* Fade In for Welcome Banner */
+        @keyframes fadeInBanner {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .welcome-banner {
+            font-size: 24px;
+            color: #fff;
+            background: #af455e;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .book-now {
+            padding: 15px 30px;
+            background: #f4839d;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .book-now:hover {
+            background: #dd689a;
+            transform: scale(1.1); /* Pulse Effect on Hover */
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 40px 20px;
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeInServices 1.5s ease-out forwards 2s; /* Fade In Services Section */
+        }
+
+        /* Fade In for Services Section */
+        @keyframes fadeInServices {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .services-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .service-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeInCard 1.5s ease-out forwards; /* Fade In for each service card */
+        }
+
+        /* Fade In for Service Card */
+        @keyframes fadeInCard {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 40px 20px;
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeInGallery 1.5s ease-out forwards 2.5s; /* Fade In Gallery Section */
+        }
+
+        /* Fade In for Gallery Section */
+        @keyframes fadeInGallery {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 250px;
+            opacity: 0;
+            animation: fadeInImage 1.5s ease-out forwards; /* Fade In for each gallery image */
+        }
+
+        /* Fade In for Gallery Item */
+        @keyframes fadeInImage {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 40px 20px;
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeInTestimonials 1.5s ease-out forwards 3s; /* Fade In Testimonials Section */
+        }
+
+        /* Fade In for Testimonials Section */
+        @keyframes fadeInTestimonials {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .testimonial-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            text-align: center;
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .main img, .about-us {
+                width: 90%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <img src="https://www.weddingsutra.com/images/bride/fashion/jewelry-series-gujarati-bride/gujrati-bride-intro.webp" alt="Couple in Photoshoot">
+        <div class="about-us">
+            <h2>About Us</h2>
+            <p>Welcome to Love Modelling Studio, a premier destination for capturing life's most precious moments. 
+                Specializing in maternity, couple, and family photoshoots, our talented photographers bring out the beauty of every moment, 
+                ensuring that your memories are preserved forever.</p>
+            <p>Our studio offers personalized packages to suit your specific needs. Whether it's your wedding, baby bump, or a special family occasion, 
+                Love Modelling Studio ensures that you leave with the perfect keepsakes of your cherished moments.</p>
+        </div>
+    </div>
+
+    <div class="center-content">
+        <div class="welcome-banner">
+            Welcome to the Love Modelling Studio. Book Our Services
+        </div>
+        <a href="{% url 'booking' %}" class="book-now">Book Now</a>
+    </div>
+
+    {% if services %}
+    <section class="services-section">
+        <h2 class="section-title">Our Services</h2>
+        <div class="services-container">
+            {% for service in services %}
+            <div class="service-card">
+                {% if service.image %}
+                    <img src="{{ service.image.url }}" alt="{{ service.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                {% endif %}
+                <h3>{{ service.name }}</h3>
+                <p>{{ service.description|linebreaks }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if gallery_items %}
+    <section class="gallery-section">
+        <h2 class="section-title">Our Gallery</h2>
+        <div class="gallery-grid">
+            {% for item in gallery_items %}
+            <div class="gallery-item">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if testimonials %}
+    <section class="testimonials">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <div class="testimonial-container">
+            {% for testimonial in testimonials %}
+            <div class="testimonial-card">
+                <div class="rating">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= testimonial.rating %}
+                            ⭐
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="message">{{ testimonial.message }}</p>
+                <p class="customer-name" style="font-weight: bold; color: #ff6f91; margin-top: 10px;">- {{ testimonial.booking.customer_name }}</p>
+                <p class="date" style="color: #666; font-size: 0.9em;">{{ testimonial.date_submitted|date:"F d, Y" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</body>
+</html>
+
+{% endblock %}

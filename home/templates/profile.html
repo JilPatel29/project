@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-pic">
+            <img src="{{ user.profile.profile_pic.url }}" alt="Profile Picture">
+        </div>
+        <h2>{{ user.username }}'s Profile</h2>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="profile-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>User Information</h3>
+            {{ u_form.as_p }}
+        </div>
+
+        <div class="form-section">
+            <h3>Profile Information</h3>
+            {{ p_form.as_p }}
+        </div>
+
+        <button type="submit" class="update-button">Update Profile</button>
+    </form>
+</div>
+
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .profile-pic img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 20px auto;
+    }
+
+    .profile-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-section {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .form-section h3 {
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .update-button {
+        background: #ff6f91;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+
+    .update-button:hover {
+        background: #e65a7a;
+    }
+</style>
+{% endblock %}
