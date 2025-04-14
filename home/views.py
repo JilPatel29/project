@@ -64,7 +64,6 @@ def process_booking(request):
                     'message': 'User not found'
                 })
 
-            
             # Create booking
             booking = Booking.objects.create(
                 customer=custom_user,
@@ -86,12 +85,31 @@ def process_booking(request):
             order_currency = 'INR'
             order_receipt = f'order_rcptid_{booking.id}'
             
-            razorpay_order = razorpay_client.order.create({
-                'amount': amount_in_paise,
-                'currency': order_currency,
-                'receipt': order_receipt,
-                'payment_capture': 1
-            })
+            # Split payment into smaller chunks if amount exceeds limit
+            if amount_in_paise > 1000000:  # If amount > 10,000 INR
+                # Create multiple orders of 9,999 INR each
+                remaining_amount = amount_in_paise
+                orders = []
+                while remaining_amount > 0:
+                    current_amount = min(999900, remaining_amount)  # 9,999 INR in paise
+                    order = razorpay_client.order.create({
+                        'amount': current_amount,
+                        'currency': order_currency,
+                        'receipt': f'{order_receipt}_{len(orders)}',
+                        'payment_capture': 1
+                    })
+                    orders.append(order)
+                    remaining_amount -= current_amount
+                
+                # Use the first order for initial payment
+                razorpay_order = orders[0]
+            else:
+                razorpay_order = razorpay_client.order.create({
+                    'amount': amount_in_paise,
+                    'currency': order_currency,
+                    'receipt': order_receipt,
+                    'payment_capture': 1
+                })
 
             # Create payment record
             payment = Payment.objects.create(
@@ -102,7 +120,6 @@ def process_booking(request):
                 razorpay_order_id=razorpay_order['id']
             )
 
-            # Return data needed for Razorpay checkout
             return JsonResponse({
                 'status': 'success',
                 'order_id': razorpay_order['id'],

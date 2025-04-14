@@ -3,6 +3,7 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,13 +100,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="booking-container">
         <h2>Book a Service</h2>
-        
+
         <form id="bookingForm" method="POST">
             {% csrf_token %}
-            
+
             <div class="form-group">
                 <label for="package">Select Package</label>
                 <select id="package" name="package" required>
@@ -130,7 +132,8 @@
 
             <div class="form-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit number" required>
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit number"
+                    required>
             </div>
 
             <div class="payment-methods">
@@ -148,15 +151,14 @@
             <button type="submit" class="submit-button">Proceed to Payment</button>
         </form>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('bookingForm');
             const paymentMethods = document.querySelectorAll('.payment-method');
 
             // Handle payment method selection
             paymentMethods.forEach(method => {
-                method.addEventListener('click', function() {
+                method.addEventListener('click', function () {
                     paymentMethods.forEach(m => m.classList.remove('selected'));
                     this.classList.add('selected');
                     this.querySelector('input[type="radio"]').checked = true;
@@ -169,11 +171,11 @@
             bookingDate.setAttribute('min', today);
 
             // Handle form submission
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
+
                 const formData = new FormData(form);
-                
+
                 try {
                     const response = await fetch('/process-booking/', {
                         method: 'POST',
@@ -187,7 +189,7 @@
 
                     if (data.status === 'success') {
                         if (formData.get('payment_method') === 'cash') {
-                            window.location.href = data.redirect_url;
+                            window.location.href = '/booking-confirmation/';
                         } else {
                             // Initialize Razorpay payment
                             const options = {
@@ -205,7 +207,7 @@
                                 theme: {
                                     color: '#ff6f91'
                                 },
-                                handler: async function(response) {
+                                handler: async function (response) {
                                     try {
                                         const verificationResponse = await fetch('/payment-callback/', {
                                             method: 'POST',
@@ -232,7 +234,7 @@
                                     }
                                 },
                                 modal: {
-                                    ondismiss: function() {
+                                    ondismiss: function () {
                                         alert('Payment cancelled. Please try again.');
                                     }
                                 }
@@ -251,6 +253,9 @@
             });
         });
     </script>
+
+
 </body>
+
 </html>
 {% endblock %}
