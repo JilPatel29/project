@@ -32,15 +32,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import Booking, Payment, Package
 import razorpay
+import uuid
 import json
 import hmac
 import hashlib
-
 
                         
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
+
 
 @login_required
 def process_booking(request):
@@ -56,19 +57,34 @@ def process_booking(request):
             package = Package.objects.get(id=package_id)
             
             # Get or create CustomUser instance
+            user = request.user
+            custom_user = None
+            
             try:
-                custom_user = CustomUser.objects.get(id=request.user.id)
+                custom_user = CustomUser.objects.get(username=user.username)
             except CustomUser.DoesNotExist:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'User not found'
-                })
+                # Generate unique username if needed
+                username = user.username
+                if CustomUser.objects.filter(username=username).exists():
+                    username = f"{user.username}_{str(uuid.uuid4())[:8]}"
+                
+                # Create CustomUser instance
+                custom_user = CustomUser.objects.create(
+                    username=username,
+                    email=user.email,
+                    password=user.password,
+                    is_active=True,
+                    is_staff=user.is_staff,
+                    is_superuser=user.is_superuser,
+                    date_joined=user.date_joined,
+                    phone_number=phone
+                )
 
             # Create booking
             booking = Booking.objects.create(
                 customer=custom_user,
-                customer_name=request.user.username,
-                customer_email=request.user.email,
+                customer_name=user.username,
+                customer_email=user.email,
                 customer_phone=phone,
                 package=package,
                 booking_date=booking_date,
@@ -81,17 +97,15 @@ def process_booking(request):
             request.session['booking_id'] = booking.id
 
             # Create Razorpay order
-            amount_in_paise = int(float(package.price) * 100)  # Convert to paise
+            amount_in_paise = int(float(package.price) * 100)
             order_currency = 'INR'
             order_receipt = f'order_rcptid_{booking.id}'
             
-            # Split payment into smaller chunks if amount exceeds limit
-            if amount_in_paise > 1000000:  # If amount > 10,000 INR
-                # Create multiple orders of 9,999 INR each
+            if amount_in_paise > 1000000:
                 remaining_amount = amount_in_paise
                 orders = []
                 while remaining_amount > 0:
-                    current_amount = min(999900, remaining_amount)  # 9,999 INR in paise
+                    current_amount = min(999900, remaining_amount)
                     order = razorpay_client.order.create({
                         'amount': current_amount,
                         'currency': order_currency,
@@ -100,8 +114,6 @@ def process_booking(request):
                     })
                     orders.append(order)
                     remaining_amount -= current_amount
-                
-                # Use the first order for initial payment
                 razorpay_order = orders[0]
             else:
                 razorpay_order = razorpay_client.order.create({
@@ -144,59 +156,46 @@ def process_booking(request):
 
 @csrf_exempt
 def payment_callback(request):
-    if request.method == "POST":
+    try:
+        data = json.loads(request.body)
+        payment = Payment.objects.get(razorpay_order_id=data.get('razorpay_order_id'))
+        
+        # Verify payment signature
+        params_dict = {
+            'razorpay_payment_id': data.get('razorpay_payment_id'),
+            'razorpay_order_id': data.get('razorpay_order_id'),
+            'razorpay_signature': data.get('razorpay_signature')
+        }
+        
         try:
-            data = json.loads(request.body)
-            razorpay_payment_id = data.get('razorpay_payment_id')
-            razorpay_order_id = data.get('razorpay_order_id')
-            razorpay_signature = data.get('razorpay_signature')
-
-            params_dict = {
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_signature': razorpay_signature
-            }
-
-            try:
-                razorpay_client.utility.verify_payment_signature(params_dict)
-
-                payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
-                booking = payment.booking
-
-                payment.payment_status = 'completed'
-                payment.razorpay_payment_id = razorpay_payment_id
-                payment.razorpay_signature = razorpay_signature
-                payment.save()
-
-                booking.status = 'confirmed'
-                booking.save()
-
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Payment successful',
-                    'redirect_url': '/booking-confirmation/'
-                })
-
-            except razorpay.errors.SignatureVerificationError:
-                payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
-                payment.payment_status = 'failed'
-                payment.save()
-
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Payment verification failed'
-                })
-
+            razorpay_client.utility.verify_payment_signature(params_dict)
+            payment.payment_status = 'completed'
+            payment.razorpay_payment_id = data.get('razorpay_payment_id')
+            payment.razorpay_signature = data.get('razorpay_signature')
+            payment.save()
+            
+            # Update booking status
+            payment.booking.status = 'confirmed'
+            payment.booking.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Payment successful'
+            })
+            
         except Exception as e:
+            payment.payment_status = 'failed'
+            payment.save()
             return JsonResponse({
                 'status': 'error',
-                'message': str(e)
+                'message': 'Payment verification failed'
             })
-
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method'
-    })
+            
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
 
 def generate_otp():
     return str(random.randint(100000, 999999))
@@ -431,18 +430,20 @@ def edit_profile(request):
         
     return render(request, 'edit_profile.html')
 
-
 @login_required
 def add_testimonial(request, booking_id):
-    # Get the booking or return 404 if not found
     booking = get_object_or_404(Booking, id=booking_id)
     
-    # Check if testimonial already exists for this booking
-    existing_testimonial = Testimonial.objects.filter(booking=booking).first()
-    if existing_testimonial:
-        messages.error(request, 'You have already submitted a review for this booking.')
+    # Check if booking is completed and payment is done
+    if booking.status != 'confirmed' or booking.payment.payment_status != 'completed':
+        messages.error(request, 'You can only add testimonials for completed bookings')
         return redirect('booking_confirmation')
-
+        
+    # Check if testimonial already exists
+    if Testimonial.objects.filter(booking=booking).exists():
+        messages.error(request, 'You have already submitted a review for this booking')
+        return redirect('booking_confirmation')
+        
     if request.method == 'POST':
         message = request.POST.get('message')
         rating = request.POST.get('rating')
@@ -450,22 +451,22 @@ def add_testimonial(request, booking_id):
         if message and rating:
             try:
                 rating = int(rating)
-                if 1 <= rating <= 5:  # Validate rating range
+                if 1 <= rating <= 5:
                     testimonial = Testimonial.objects.create(
                         booking=booking,
                         message=message,
                         rating=rating,
-                        is_displayed=True  # Requires admin approval if false
+                        is_displayed=True
                     )
-                    messages.success(request, 'Thank you for your review! It will be displayed after approval.')
+                    messages.success(request, 'Thank you for your review!')
                     return redirect('booking_confirmation')
                 else:
-                    messages.error(request, 'Please provide a valid rating between 1 and 5.')
+                    messages.error(request, 'Please provide a valid rating between 1 and 5')
             except ValueError:
-                messages.error(request, 'Invalid rating value.')
+                messages.error(request, 'Invalid rating value')
         else:
-            messages.error(request, 'Please provide both a message and rating.')
-    
+            messages.error(request, 'Please provide both a message and rating')
+            
     return render(request, 'add_testimonial.html', {'booking': booking})
 
 def booking_confirmation(request):
@@ -526,7 +527,7 @@ def blog_detail(request, blog_id):
     return render(request, "blog_detail.html", {'blog': blog})
 
 
-# @login_required
+@login_required
 def booking(request):
     packages = Package.objects.all()
     context = {

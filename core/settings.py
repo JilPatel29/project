@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
+
 """
 
 from pathlib import Path, os
@@ -151,5 +152,5 @@ EMAIL_HOST_USER = 'jilpatel2952005@gmail.com'  # Replace with your Gmail address
 EMAIL_HOST_PASSWORD = 'xcss yyfp enjh pgsh'  # Replace with your Gmail app password
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
-RAZORPAY_KEY_ID = 'rzp_test_buv8Yl3GWP7SHU'
-RAZORPAY_KEY_SECRET = 'e5dRAyyx8sic8LLQzKu5yqZb'
+RAZORPAY_KEY_ID = 'rzp_test_m3lZuNa1nWKGQP'
+RAZORPAY_KEY_SECRET = 'R9SnVibbr6wjJlMpQ3McA4jE'

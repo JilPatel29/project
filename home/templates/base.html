@@ -121,14 +121,14 @@
         }
 
         .footer-section a {
-            color: #fff;
+            color: #ffffff;
             text-decoration: none;
             font-size: 18px;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, text-decoration 0.3s ease;
         }
 
         .footer-section a:hover {
-            color: #181717;
+            color: #ffd700; /* Golden color for hover */
             text-decoration: underline;
         }
 
@@ -174,9 +174,7 @@
         </div>
         <div class="auth-section">
             {% if user.is_authenticated %}
-            <!-- Update the profile section in base.html -->
             <div class="profile-section" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-                {% if user.is_authenticated %}
                 <a href="{% url 'edit_profile' %}" class="profile-link"
                     style="display: flex; align-items: center; text-decoration: none;">
                     {% if user.profile.profile_pic %}
@@ -186,9 +184,7 @@
                     {% endif %}
                     <span class="username">{{ user.username }}</span>
                 </a>
-                {% endif %}
             </div>
-
             {% else %}
             <div class="auth-buttons">
                 <a href="{% url 'login' %}" class="auth-button">Login</a>
@@ -196,7 +192,6 @@
             </div>
             {% endif %}
         </div>
-
 
         <nav>
             <a href="{% url 'home' %}"><b>Home</b></a>
@@ -217,9 +212,9 @@
         <div class="footer-container">
             <div class="footer-section">
                 <h4>Contact Us</h4>
-                <p>Email: <a href="mailto:info@lovestudio87.com"> lovestudio87@gmail.com</a></p>
-                <p>Phone: <a href="tel: 9998456649"> 9998456649</a></p>
-                <p>Address: 11,Tirupati Complex, Sardar Chowk,Ahmedabad,382450</p>
+                <p>Email: <a href="mailto:info@lovestudio87.com">lovestudio87@gmail.com</a></p>
+                <p>Phone: <a href="tel:9998456649">9998456649</a></p>
+                <p>Address: 11, Tirupati Complex, Sardar Chowk, Ahmedabad, 382450</p>
             </div>
 
             <div class="footer-section">

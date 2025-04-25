@@ -10,6 +10,7 @@
     <title>Book a Service</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
+      
         .booking-container {
             max-width: 800px;
             margin: 50px auto;
@@ -151,12 +152,15 @@
             <button type="submit" class="submit-button">Proceed to Payment</button>
         </form>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('bookingForm');
             const paymentMethods = document.querySelectorAll('.payment-method');
+            const bookingDate = document.getElementById('booking_date');
+            const bookingTime = document.getElementById('booking_time');
 
-            // Handle payment method selection
+            // Handle payment method selection UI
             paymentMethods.forEach(method => {
                 method.addEventListener('click', function () {
                     paymentMethods.forEach(m => m.classList.remove('selected'));
@@ -165,10 +169,22 @@
                 });
             });
 
-            // Disable past dates in date picker
-            const bookingDate = document.getElementById('booking_date');
+            // Disable past dates
             const today = new Date().toISOString().split('T')[0];
             bookingDate.setAttribute('min', today);
+
+            // Update min time if today's date is selected
+            bookingDate.addEventListener('change', function () {
+                if (this.value === today) {
+                    const now = new Date();
+                    const currentHour = now.getHours();
+                    const currentMinutes = now.getMinutes();
+                    const minTime = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+                    bookingTime.min = minTime;
+                } else {
+                    bookingTime.min = '';
+                }
+            });
 
             // Handle form submission
             form.addEventListener('submit', async function (e) {
@@ -191,7 +207,6 @@
                         if (formData.get('payment_method') === 'cash') {
                             window.location.href = '/booking-confirmation/';
                         } else {
-                            // Initialize Razorpay payment
                             const options = {
                                 key: data.razorpay_key,
                                 amount: data.amount,
@@ -253,8 +268,6 @@
             });
         });
     </script>
-
-
 </body>
 
 </html>
