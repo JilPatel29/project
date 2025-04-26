@@ -97,7 +97,6 @@ class Gallery(models.Model):
     def __str__(self):
         return f"{self.category.capitalize()} - {self.uploaded_at.strftime('%Y-%m-%d')}"
 
-
 class ContactUs(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -126,7 +125,7 @@ class Booking(models.Model):
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=15)
-    package = models.ForeignKey(Package, on_delete=models.CASCADE)
+    packages = models.ManyToManyField(Package)  # Changed from ForeignKey to ManyToManyField
     booking_date = models.DateField()
     booking_time = models.TimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -140,7 +139,7 @@ class Booking(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.total_amount:
-            self.total_amount = self.package.price
+            self.total_amount = sum(package.price for package in self.packages.all())
         super().save(*args, **kwargs)
 
     class Meta:
@@ -189,7 +188,6 @@ class Testimonial(models.Model):
         if self.booking:
             return f"Testimonial by {self.booking.customer_name}"
         return "Testimonial (No Booking Linked)"
-
 
     class Meta:
         ordering = ['-date_submitted']

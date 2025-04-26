@@ -85,6 +85,35 @@
             transform: scale(1.05);
         }
 
+        .custom-package {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 20px;
+            border-radius: 15px;
+        }
+
+        .custom-package h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .contact-button {
+            display: inline-block;
+            background: #ff6f91;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .contact-button:hover {
+            background: #e65a7a;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -120,7 +149,6 @@
                     {% endif %}
                     <h3>{{ service.name }}</h3>
                     <p>{{ service.description|linebreaks }}</p>
-
                 </div>
             {% endif %}
         {% endfor %}
@@ -130,6 +158,12 @@
         </div>
     {% endif %}
 </section>
+
+<div class="custom-package">
+    <h2>Need a Customized Package?</h2>
+    <p>We understand that every moment is unique. Contact us to create a personalized photography package that perfectly matches your vision.</p>
+    <a href="{% url 'contact' %}" class="contact-button">Contact Us for Custom Package</a>
+</div>
 
 </body>
 </html>

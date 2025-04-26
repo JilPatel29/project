@@ -10,7 +10,6 @@
     <title>Book a Service</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-      
         .booking-container {
             max-width: 800px;
             margin: 50px auto;
@@ -42,6 +41,37 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+        }
+
+        .package-selection {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .package-option {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .package-option:hover {
+            background-color: #f9f9f9;
+        }
+
+        .package-option.selected {
+            border-color: #ff6f91;
+            background-color: #fff5f8;
+        }
+
+        .package-option input[type="checkbox"] {
+            margin-right: 10px;
         }
 
         .payment-methods {
@@ -88,16 +118,14 @@
             background-color: #ff5c82;
         }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .success-message {
-            color: #28a745;
-            font-size: 14px;
-            margin-top: 5px;
+        .total-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: right;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -110,31 +138,34 @@
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="package">Select Package</label>
-                <select id="package" name="package" required>
-                    <option value="">--Select a Package--</option>
+                <label>Select Packages</label>
+                <div class="package-selection">
                     {% for package in packages %}
-                    <option value="{{ package.id }}" data-price="{{ package.price }}">
-                        {{ package.name }} - ₹{{ package.price }}
-                    </option>
+                    <div class="package-option">
+                        <input type="checkbox" name="packages" value="{{ package.id }}" data-price="{{ package.price }}" class="package-checkbox">
+                        <label>{{ package.name }} - ₹{{ package.price }}</label>
+                    </div>
                     {% endfor %}
-                </select>
+                </div>
+            </div>
+
+            <div class="total-amount">
+                Total Amount: ₹<span id="totalAmount">0</span>
             </div>
 
             <div class="form-group">
-                <label for="booking_date">Preferred Date</label>
+                <label for="booking_date">Booking Date</label>
                 <input type="date" id="booking_date" name="booking_date" required>
             </div>
 
             <div class="form-group">
-                <label for="booking_time">Preferred Time</label>
+                <label for="booking_time">Booking Time</label>
                 <input type="time" id="booking_time" name="booking_time" required>
             </div>
 
             <div class="form-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit number"
-                    required>
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit number" required>
             </div>
 
             <div class="payment-methods">
@@ -154,15 +185,32 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('bookingForm');
             const paymentMethods = document.querySelectorAll('.payment-method');
             const bookingDate = document.getElementById('booking_date');
             const bookingTime = document.getElementById('booking_time');
+            const packageCheckboxes = document.querySelectorAll('.package-checkbox');
+            const totalAmountSpan = document.getElementById('totalAmount');
+
+            // Calculate total amount when packages are selected/deselected
+            function updateTotalAmount() {
+                let total = 0;
+                packageCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        total += parseFloat(checkbox.dataset.price);
+                    }
+                });
+                totalAmountSpan.textContent = total.toFixed(2);
+            }
+
+            packageCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateTotalAmount);
+            });
 
             // Handle payment method selection UI
             paymentMethods.forEach(method => {
-                method.addEventListener('click', function () {
+                method.addEventListener('click', function() {
                     paymentMethods.forEach(m => m.classList.remove('selected'));
                     this.classList.add('selected');
                     this.querySelector('input[type="radio"]').checked = true;
@@ -174,7 +222,7 @@
             bookingDate.setAttribute('min', today);
 
             // Update min time if today's date is selected
-            bookingDate.addEventListener('change', function () {
+            bookingDate.addEventListener('change', function() {
                 if (this.value === today) {
                     const now = new Date();
                     const currentHour = now.getHours();
@@ -187,8 +235,15 @@
             });
 
             // Handle form submission
-            form.addEventListener('submit', async function (e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
+
+                // Check if at least one package is selected
+                const selectedPackages = document.querySelectorAll('input[name="packages"]:checked');
+                if (selectedPackages.length === 0) {
+                    alert('Please select at least one package');
+                    return;
+                }
 
                 const formData = new FormData(form);
 
@@ -222,7 +277,7 @@
                                 theme: {
                                     color: '#ff6f91'
                                 },
-                                handler: async function (response) {
+                                handler: async function(response) {
                                     try {
                                         const verificationResponse = await fetch('/payment-callback/', {
                                             method: 'POST',
@@ -249,7 +304,7 @@
                                     }
                                 },
                                 modal: {
-                                    ondismiss: function () {
+                                    ondismiss: function() {
                                         alert('Payment cancelled. Please try again.');
                                     }
                                 }

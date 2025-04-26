@@ -48,13 +48,20 @@ def process_booking(request):
     if request.method == "POST":
         try:
             # Get form data
-            package_id = request.POST.get('package')
+            package_ids = request.POST.getlist('packages')  # Get multiple package IDs
             booking_date = request.POST.get('booking_date')
             booking_time = request.POST.get('booking_time')
             phone = request.POST.get('phone')
             
-            # Get the package
-            package = Package.objects.get(id=package_id)
+            if not package_ids:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please select at least one package'
+                })
+            
+            # Get the packages
+            packages = Package.objects.filter(id__in=package_ids)
+            total_amount = sum(package.price for package in packages)
             
             # Get or create CustomUser instance
             user = request.user
@@ -63,12 +70,10 @@ def process_booking(request):
             try:
                 custom_user = CustomUser.objects.get(username=user.username)
             except CustomUser.DoesNotExist:
-                # Generate unique username if needed
                 username = user.username
                 if CustomUser.objects.filter(username=username).exists():
                     username = f"{user.username}_{str(uuid.uuid4())[:8]}"
                 
-                # Create CustomUser instance
                 custom_user = CustomUser.objects.create(
                     username=username,
                     email=user.email,
@@ -86,47 +91,35 @@ def process_booking(request):
                 customer_name=user.username,
                 customer_email=user.email,
                 customer_phone=phone,
-                package=package,
                 booking_date=booking_date,
                 booking_time=booking_time,
-                total_amount=package.price,
+                total_amount=total_amount,
                 status='pending'
             )
+            
+            # Add selected packages to the booking
+            booking.packages.set(packages)
 
             # Store booking ID in session
             request.session['booking_id'] = booking.id
 
             # Create Razorpay order
-            amount_in_paise = int(float(package.price) * 100)
+            amount_in_paise = int(float(total_amount) * 100)
             order_currency = 'INR'
             order_receipt = f'order_rcptid_{booking.id}'
-            
-            if amount_in_paise > 1000000:
-                remaining_amount = amount_in_paise
-                orders = []
-                while remaining_amount > 0:
-                    current_amount = min(999900, remaining_amount)
-                    order = razorpay_client.order.create({
-                        'amount': current_amount,
-                        'currency': order_currency,
-                        'receipt': f'{order_receipt}_{len(orders)}',
-                        'payment_capture': 1
-                    })
-                    orders.append(order)
-                    remaining_amount -= current_amount
-                razorpay_order = orders[0]
-            else:
-                razorpay_order = razorpay_client.order.create({
-                    'amount': amount_in_paise,
-                    'currency': order_currency,
-                    'receipt': order_receipt,
-                    'payment_capture': 1
-                })
+
+            # Create a single order for the full amount
+            razorpay_order = razorpay_client.order.create({
+                'amount': amount_in_paise,
+                'currency': order_currency,
+                'receipt': order_receipt,
+                'payment_capture': 1
+            })
 
             # Create payment record
             payment = Payment.objects.create(
                 booking=booking,
-                amount=package.price,
+                amount=total_amount,
                 payment_method='online',
                 payment_status='pending',
                 razorpay_order_id=razorpay_order['id']
