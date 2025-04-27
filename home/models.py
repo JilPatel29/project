@@ -125,7 +125,7 @@ class Booking(models.Model):
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=15)
-    packages = models.ManyToManyField(Package)  # Changed from ForeignKey to ManyToManyField
+    packages = models.ManyToManyField(Package)
     booking_date = models.DateField()
     booking_time = models.TimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -154,8 +154,8 @@ class Payment(models.Model):
     )
     
     PAYMENT_METHOD = (
-        ('cash', 'Cash on Visit'),
-        ('online', 'Online Payment')
+        ('cash', 'Cash'),
+        ('online', 'Online')
     )
 
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment', default=1)
@@ -175,6 +175,9 @@ class Payment(models.Model):
     def save(self, *args, **kwargs):
         if not self.amount:
             self.amount = self.booking.total_amount
+        # For cash payments, automatically mark as completed
+        if self.payment_method == 'cash' and self.payment_status == 'pending':
+            self.payment_status = 'completed'
         super().save(*args, **kwargs)
 
 class Testimonial(models.Model):
