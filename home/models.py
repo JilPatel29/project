@@ -177,7 +177,7 @@ class Payment(models.Model):
             self.amount = self.booking.total_amount
         # For cash payments, automatically mark as completed
         if self.payment_method == 'cash' and self.payment_status == 'pending':
-            self.payment_status = 'completed'
+            self.payment_status = 'pending'
         super().save(*args, **kwargs)
 
 class Testimonial(models.Model):

@@ -148,8 +148,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'jilpatel2952005@gmail.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'xcss yyfp enjh pgsh'  # Replace with your Gmail app password
+EMAIL_HOST_USER = 'jilpatel2952005@gmail.com' 
+EMAIL_HOST_PASSWORD = 'xcss yyfp enjh pgsh' 
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 RAZORPAY_KEY_ID = 'rzp_test_m3lZuNa1nWKGQP'

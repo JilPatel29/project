@@ -37,11 +37,9 @@ import json
 import hmac
 import hashlib
 
-                        
 razorpay_client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
-
 
 @login_required
 def process_booking(request):
@@ -52,6 +50,7 @@ def process_booking(request):
             booking_date = request.POST.get('booking_date')
             booking_time = request.POST.get('booking_time')
             phone = request.POST.get('phone')
+            payment_method = request.POST.get('payment_method')
             
             if not package_ids:
                 return JsonResponse({
@@ -85,7 +84,8 @@ def process_booking(request):
                     phone_number=phone
                 )
 
-            # Create booking
+            # Create booking with confirmed status for cash payments
+            status = 'confirmed' if payment_method == 'cash' else 'pending'
             booking = Booking.objects.create(
                 customer=custom_user,
                 customer_name=user.username,
@@ -94,7 +94,7 @@ def process_booking(request):
                 booking_date=booking_date,
                 booking_time=booking_time,
                 total_amount=total_amount,
-                status='pending'
+                status=status
             )
             
             # Add selected packages to the booking
@@ -103,12 +103,26 @@ def process_booking(request):
             # Store booking ID in session
             request.session['booking_id'] = booking.id
 
-            # Create Razorpay order
+            payment = Payment.objects.create(
+                booking=booking,
+                amount=total_amount,
+                payment_method=payment_method,
+                payment_status='pending'
+            )
+
+           
+            if payment_method == 'cash':
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'redirect_url': '/booking-confirmation/'
+                })
+
+            # For online payments, create Razorpay order
             amount_in_paise = int(float(total_amount) * 100)
             order_currency = 'INR'
             order_receipt = f'order_rcptid_{booking.id}'
 
-            # Create a single order for the full amount
             razorpay_order = razorpay_client.order.create({
                 'amount': amount_in_paise,
                 'currency': order_currency,
@@ -116,14 +130,8 @@ def process_booking(request):
                 'payment_capture': 1
             })
 
-            # Create payment record
-            payment = Payment.objects.create(
-                booking=booking,
-                amount=total_amount,
-                payment_method='online',
-                payment_status='pending',
-                razorpay_order_id=razorpay_order['id']
-            )
+            payment.razorpay_order_id = razorpay_order['id']
+            payment.save()
 
             return JsonResponse({
                 'status': 'success',
@@ -167,7 +175,7 @@ def payment_callback(request):
             payment.razorpay_signature = data.get('razorpay_signature')
             payment.save()
             
-            # Update booking status
+            # Update booking status to confirmed
             payment.booking.status = 'confirmed'
             payment.booking.save()
             
@@ -179,6 +187,11 @@ def payment_callback(request):
         except Exception as e:
             payment.payment_status = 'failed'
             payment.save()
+            
+            # Keep booking status as pending for failed payments
+            payment.booking.status = 'pending'
+            payment.booking.save()
+            
             return JsonResponse({
                 'status': 'error',
                 'message': 'Payment verification failed'
@@ -290,7 +303,7 @@ def index(request):
     testimonials = Testimonial.objects.filter(is_displayed=True).order_by('-date_submitted')[:3]
     
     # Get gallery items
-    gallery_items = Gallery.objects.all().order_by('-uploaded_at')[:6]
+    gallery_items = Gallery.objects.all().order_by('-uploaded_at')[:15]
     
     # Get services
     services = Service.objects.all()
@@ -306,7 +319,7 @@ def index(request):
 def home(request):
     # Similar to index view
     testimonials = Testimonial.objects.filter(is_displayed=True).order_by('-date_submitted')[:6]
-    gallery_items = Gallery.objects.all().order_by('-uploaded_at')[:12]
+    gallery_items = Gallery.objects.all().order_by('-uploaded_at')[:15]
     services = Service.objects.all()
     
     context = {
@@ -345,7 +358,6 @@ def profile_view(request):
     }
     return render(request, 'profile.html', context)
 
-
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
@@ -369,7 +381,6 @@ def forgot_password(request):
             return render(request, 'forgot_password.html', {'email': email})
 
     return render(request, 'forgot_password.html')
-
 
 def reset_password(request, email):
     stored_email = request.session.get('reset_password_email')
@@ -518,7 +529,6 @@ def blog(request):
 def blog_detail(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
     return render(request, "blog_detail.html", {'blog': blog})
-
 
 @login_required
 def booking(request):
